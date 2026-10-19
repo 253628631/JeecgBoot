@@ -1,0 +1,13 @@
+# JeecgBoot 后端 Spring Boot（NAS 部署用）。
+# 构建上下文 = deploy/build/backend/（workflow 组织：jeecg-system-start.jar）
+# base 用 Docker Hub 的 JRE（GitHub runner 可达）；最终镜像推 ghcr 供 NAS 拉取。
+FROM eclipse-temurin:17-jre
+ENV TZ=Asia/Shanghai LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+    JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+WORKDIR /jeecg-boot
+COPY jeecg-system-start.jar /jeecg-boot/jeecg-system-start.jar
+RUN mkdir -p /jeecg-boot/config /opt/upFiles /opt/webapp
+EXPOSE 8080
+# 后端不暴露宿主端口，由前端 nginx 反代 /jeecgboot/；jar 已内嵌 application-docker profile
+CMD ["java","-Djava.security.egd=file:/dev/./urandom","-Xms512m","-Xmx2g","-jar","/jeecg-boot/jeecg-system-start.jar"]
